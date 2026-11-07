@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Аружанға 💕</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% 15%, #4a0f36 0%, #20061a 45%, #0a0208 100%);
+    color:#fff; user-select:none; position:relative;
+  }
+
+  /* ---------- фондық жүректер ---------- */
+  .bg-heart {
+    position:absolute; bottom:-40px; opacity:0; pointer-events:none;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) rotate(0deg); opacity:0; }
+    10%  { opacity:.28; }
+    85%  { opacity:.28; }
+    100% { transform: translateY(-115vh) rotate(320deg); opacity:0; }
+  }
+
+  /* ---------- экрандар ---------- */
+  .screen {
+    position:absolute; inset:0; z-index:10;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:26px; text-align:center;
+  }
+  .hidden { display:none !important; }
+
+  .big-heart {
+    font-size: 92px; line-height:1;
+    animation: beat 1.3s ease-in-out infinite;
+    filter: drop-shadow(0 0 28px rgba(255,70,140,.85));
+  }
+  @keyframes beat {
+    0%,100% { transform: scale(1); }
+    14%     { transform: scale(1.2); }
+    28%     { transform: scale(1); }
+    42%     { transform: scale(1.13); }
+    56%     { transform: scale(1); }
+  }
+
+  h1 {
+    font-size: 48px; margin-top: 14px; letter-spacing: 2px;
+    background: linear-gradient(90deg,#ff8ab8,#ffe0ef,#ff8ab8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { margin-top: 12px; font-size: 17px; color: #ffc4dd; opacity:.9; }
+  .hint { margin-top: 8px; font-size: 14px; color: #ffffff70; }
+
+  button {
+    margin-top: 34px; padding: 17px 44px; font-size: 20px; font-weight: 600;
+    border: none; border-radius: 60px; color:#fff; cursor:pointer;
+    touch-action: manipulation;
+    background: linear-gradient(135deg,#ff5c9b,#ff2e63);
+    box-shadow: 0 10px 34px rgba(255,45,99,.55), 0 0 0 0 rgba(255,45,99,.6);
+    animation: pulseGlow 2s ease-in-out infinite;
+    transition: transform .15s;
+  }
+  button:active { transform: scale(.94); }
+  @keyframes pulseGlow {
+    0%,100% { box-shadow: 0 10px 34px rgba(255,45,99,.55), 0 0 0 0 rgba(255,45,99,.5); }
+    50%     { box-shadow: 0 10px 34px rgba(255,45,99,.55), 0 0 0 18px rgba(255,45,99,0); }
+  }
+
+  /* ---------- ойын экраны ---------- */
+  .hud { position:absolute; top:0; left:0; right:0; padding:18px 22px; z-index:20; pointer-events:none; }
+  .score-line { text-align:center; font-size:17px; margin-bottom:9px; letter-spacing:.5px; }
+  .progress { height:9px; border-radius:10px; background: rgba(255,255,255,.14); overflow:hidden; }
+  #progressBar {
+    height:100%; width:0%; border-radius:10px;
+    background: linear-gradient(90deg,#ff9dc4,#ff2e63);
+    transition: width .35s cubic-bezier(.3,.9,.4,1);
+  }
+
+  #playfield { position:absolute; inset:0; overflow:hidden; touch-action:none; }
+
+  .falling-heart { position:absolute; left:0; top:0; will-change:transform; touch-action:none; }
+  .h-inner {
+    display:block; cursor:pointer;
+    filter: drop-shadow(0 0 12px rgba(255,80,140,.75));
+  }
+  .falling-heart.caught .h-inner { animation: pop .45s ease-out forwards; }
+  @keyframes pop {
+    0%   { transform: scale(1);   opacity:1; }
+    100% { transform: scale(2.4); opacity:0; }
+  }
+
+  .message {
+    position:absolute; left:50%; bottom:56px;
+    transform: translateX(-50%) translateY(24px);
+    max-width: 86%; padding: 14px 24px; border-radius: 22px;
+    background: rgba(255,255,255,.11);
+    border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    font-size: 16px; line-height:1.4; color:#fff; text-align:center;
+    opacity:0; pointer-events:none; z-index:25;
+    transition: all .45s cubic-bezier(.2,.9,.3,1.25);
+  }
+  .message.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- финал ---------- */
+  h2 {
+    font-size: 40px; margin-top: 10px;
+    background: linear-gradient(90deg,#ff8ab8,#ffe0ef,#ff8ab8);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .letter-text { margin-top: 22px; font-size: 19px; line-height: 1.6; color:#ffd9e8; }
+  .letter-small { margin-top: 20px; font-size: 15px; color:#ff9dc4; letter-spacing:1px; }
+  .burst { position:absolute; font-size: 26px; pointer-events:none; z-index:15; }
+</style>
+</head>
+<body>
+
+<div id="bg-hearts"></div>
+
+<!-- ---------- БАСТАУ ---------- -->
+<div id="start-screen" class="screen">
+  <div class="big-heart">💖</div>
+  <h1>Аружан</h1>
+  <p class="sub">Сен үшін кішкентай ойын 💌</p>
+  <p class="hint">Түскен жүректерді ұста — 30 жүрек</p>
+  <button id="startBtn">Бастау 💕</button>
+</div>
+
+<!-- ---------- ОЙЫН ---------- -->
+<div id="game-screen" class="screen hidden">
+  <div class="hud">
+    <div class="score-line">💖 <span id="score">0</span> / 30</div>
+    <div class="progress"><div id="progressBar"></div></div>
+  </div>
+  <div id="playfield"></div>
+  <div id="message" class="message"></div>
+</div>
+
+<!-- ---------- ФИНАЛ ---------- -->
+<div id="end-screen" class="screen hidden">
+  <div class="big-heart">💖</div>
+  <h2>Аружан</h2>
+  <p class="letter-text">
+    Сен барлық жүректерді жинадың!<br>
+    Бірақ ең бастысы —<br>
+    менің жүрегім әлдеқашан сенікі 💕
+  </p>
+  <p class="letter-small">Сені сүйемін, Аружан</p>
+  <button id="againBtn">Тағы ойнау 💗</button>
+</div>
+
+<script>
+/* ================= ДАЙЫНДЫҚ ================= */
+const startScreen = document.getElementById('start-screen');
+const gameScreen  = document.getElementById('game-screen');
+const endScreen   = document.getElementById('end-screen');
+const playfield   = document.getElementById('playfield');
+const scoreEl     = document.getElementById('score');
+const progressBar = document.getElementById('progressBar');
+const msgEl       = document.getElementById('message');
+
+const TARGET = 30;
+const ICONS  = ['💖','❤️','💕','💗','💓','💞','💘','💝'];
+
+const MESSAGES = [
+  "Аружан, сенің күлкің — менің күнім ☀️",
+  "Сен барда әлем әдемірек 💫",
+  "Саған деген сезімім шексіз 🌊",
+  "Аружан, сен менің жүрегімнің иесісің 💖",
+  "Күн сайын саған жаңадан ғашық боламын 🌹",
+  "Сенің дауысың — менің сүйікті әнім 🎵",
+  "Аружан, сенімен бақыттымын 😊",
+  "Сен — менің ең үлкен жеңісім 🏆",
+  "Жүрегім тек сенің атыңды айтады 💓",
+  "Сені сүйемін, Аружан! ❤️"
+];
+
+/* ---------- фондық жүректер ---------- */
+(function makeBgHearts() {
+  const bg = document.getElementById('bg-hearts');
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('div');
+    h.className = 'bg-heart';
+    h.textContent = ICONS[i % ICONS.length];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.fontSize = (11 + Math.random() * 20) + 'px';
+    h.style.animationDuration = (11 + Math.random() * 14) + 's';
+    h.style.animationDelay = (-Math.random() * 22) + 's';
+    bg.appendChild(h);
+  }
+})();
+
+/* ---------- дыбыс ---------- */
+let actx = null;
+function beep(freq) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.09, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.28);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + 0.3);
+  } catch (e) {}
+}
+
+/* ================= ОЙЫН ЛОГИКАСЫ ================= */
+let playing = false;
+let score = 0;
+let hearts = [];
+let lastTime = 0;
+let spawnTimer = 0;
+let spawnInterval = 700;
+let fieldW = 0, fieldH = 0;
+let msgTimer = null;
+
+function resize() {
+  fieldW = playfield.clientWidth;
+  fieldH = playfield.clientHeight;
+}
+window.addEventListener('resize', resize);
+
+function startGame() {
+  startScreen.classList.add('hidden');
+  endScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+
+  score = 0;
+  hearts.forEach(h => h.el.remove());
+  hearts = [];
+  spawnTimer = 0;
+  spawnInterval = 700;
+  scoreEl.textContent = '0';
+  progressBar.style.width = '0%';
+  msgEl.classList.remove('show');
+
+  resize();
+  playing = true;
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+  beep(520);
+}
+
+function loop(t) {
+  if (!playing) return;
+  const dt = Math.min(60, t - lastTime) / 1000;
+  lastTime = t;
+
+  // жаңа жүрек шығару
+  spawnTimer += dt * 1000;
+  if (spawnTimer >= spawnInterval) {
+    spawnTimer = 0;
+    spawnHeart();
+    // ойын соңына қарай жылдамдайды
+    spawnInterval = Math.max(340, 700 - score * 11);
+  }
+
+  // қозғалыс
+  for (let i = hearts.length - 1; i >= 0; i--) {
+    const h = hearts[i];
+    h.y += h.vy * dt;
+    h.el.style.transform = `translate3d(${h.x}px, ${h.y}px, 0)`;
+    h.inner.style.transform = `rotate(${Math.sin(t / 620 + h.phase) * 16}deg)`;
+    if (h.y > fieldH + 70) {
+      h.el.remove();
+      hearts.splice(i, 1);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+function spawnHeart() {
+  const el = document.createElement('div');
+  el.className = 'falling-heart';
+
+  const inner = document.createElement('span');
+  inner.className = 'h-inner';
+  inner.textContent = ICONS[Math.floor(Math.random() * ICONS.length)];
+  const size = 34 + Math.random() * 24;
+  inner.style.fontSize = size + 'px';
+  el.appendChild(inner);
+
+  const x = Math.random() * Math.max(10, fieldW - size - 10);
+  const y = -70;
+  el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  playfield.appendChild(el);
+
+  const heart = {
+    el, inner, x, y,
+    vy: 95 + Math.random() * 85,
+    phase: Math.random() * Math.PI * 2
+  };
+
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    catchHeart(heart);
+  }, { passive: false });
+
+  hearts.push(heart);
+}
+
+function catchHeart(h) {
+  const idx = hearts.indexOf(h);
+  if (idx === -1) return;
+  hearts.splice(idx, 1);
+
+  h.el.classList.add('caught');
+  h.el.style.pointerEvents = 'none';
+  setTimeout(() => h.el.remove(), 480);
+
+  score++;
+  scoreEl.textContent = score;
+  progressBar.style.width = (score / TARGET * 100) + '%';
+  beep(480 + score * 14);
+
+  // әр 3 жүрек сайын — жаңа сөз
+  if (score % 3 === 0 && score / 3 <= MESSAGES.length) {
+    showMessage(MESSAGES[score / 3 - 1]);
+  }
+
+  if (score >= TARGET) endGame();
+}
+
+function showMessage(text) {
+  msgEl.textContent = text;
+  msgEl.classList.add('show');
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => msgEl.classList.remove('show'), 2800);
+}
+
+function endGame() {
+  playing = false;
+  hearts.forEach(h => h.el.remove());
+  hearts = [];
+
+  setTimeout(() => {
+    gameScreen.classList.add('hidden');
+    endScreen.classList.remove('hidden');
+    burstHearts();
+    beep(660); setTimeout(() => beep(880), 160);
+  }, 850);
+}
+
+/* ---------- финалдағы жүрек жарылысы ---------- */
+function burstHearts() {
+  for (let i = 0; i < 26; i++) {
+    const b = document.createElement('div');
+    b.className = 'burst';
+    b.textContent = ICONS[Math.floor(Math.random() * ICONS.length)];
+    b.style.left = (10 + Math.random() * 80) + '%';
+    b.style.top  = (45 + Math.random() * 40) + '%';
+    b.style.fontSize = (16 + Math.random() * 22) + 'px';
+    b.style.opacity = '0';
+    b.style.transition = `all ${1.1 + Math.random()}s cubic-bezier(.2,.8,.3,1)`;
+    document.getElementById('end-screen').appendChild(b);
+
+    requestAnimationFrame(() => {
+      b.style.opacity = '1';
+      b.style.transform =
+        `translate(${(Math.random() - 0.5) * 260}px, ${-140 - Math.random() * 220}px) rotate(${(Math.random() - 0.5) * 400}deg)`;
+    });
+
+    setTimeout(() => b.remove(), 2600);
+  }
+}
+
+/* ---------- батырмалар ---------- */
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('againBtn').addEventListener('click', startGame);
+</script>
+</body>
+</html>
